@@ -1,4 +1,4 @@
-__version__ = "0.3.0"
+__version__ = "0.3.3"
 
 import os
 import sys
@@ -19,15 +19,19 @@ logging.basicConfig(level=logging.INFO, format='flaskwebgui - [%(levelname)s] - 
 
 def find_chrome_mac():
 
-    default_dir = r'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-    if os.path.exists(default_dir):
-        return default_dir
+    chrome_names = ['Google Chrome', 'Chromium']
 
-    # use mdfind ci to locate Chrome in alternate locations and return the first one
-    name = 'Google Chrome.app'
-    alternate_dirs = [x for x in sps.check_output(["mdfind", name]).decode().split('\n') if x.endswith(name)] 
-    if len(alternate_dirs):
-        return alternate_dirs[0] + '/Contents/MacOS/Google Chrome'
+    for chrome_name in chrome_names:
+        default_dir = r'/Applications/{}.app/Contents/MacOS/{}'.format(chrome_name, chrome_name)
+        if os.path.exists(default_dir):
+            return default_dir
+
+        # use mdfind ci to locate Chrome in alternate locations and return the first one
+        name = '{}.app'.format(chrome_name)
+        alternate_dirs = [x for x in sps.check_output(["mdfind", name]).decode().split('\n') if x.endswith(name)] 
+        if len(alternate_dirs):
+            return alternate_dirs[0] + '/Contents/MacOS/{}'.format(chrome_name)
+
     return None
 
 
@@ -101,7 +105,7 @@ def get_default_chrome_path():
 
 
 # class FlaskwebguiDjangoMiddleware:
-    
+      #TODO help needed here
 #     def __init__(self, get_response=None):
 #         self.get_response = get_response
 
@@ -197,14 +201,17 @@ class FlaskUI:
 
     def add_flask_middleware(self):
 
-        @self.app.route("/flaskwebgui-keep-server-alive", methods=['GET'])
-        def keep_alive():
-            return self.keep_server_running()
-
         @self.app.after_request
         def keep_alive_after_request(response):
             self.keep_server_running()
             return response
+        
+        @self.app.route("/flaskwebgui-keep-server-alive")
+        def keep_alive_pooling():
+            self.keep_server_running()
+            return "ok"
+        
+        
 
 
     def start_flask(self):
@@ -235,17 +242,23 @@ class FlaskUI:
         
 
     def add_fastapi_middleware(self):
+        
         @self.app.middleware("http")
         async def keep_alive_after_request(request, call_next):
             response = await call_next(request)
             self.keep_server_running()
             return response
-
+        
+        @self.app.route("/flaskwebgui-keep-server-alive")
+        async def keep_alive_pooling():
+            self.keep_server_running()
+            return "ok"
+        
 
     def start_fastapi(self):
         import uvicorn
         self.add_fastapi_middleware()
-        uvicorn.run(self.app, host=self.host, port=self.port, log_level="info")
+        uvicorn.run(self.app, host=self.host, port=self.port, log_level="warning")
 
 
 

@@ -11,7 +11,7 @@ pip install flaskwebgui
 If you are using `conda` checkout [this link](https://github.com/conda-forge/flaskwebgui-feedstock).
 
 For any framework selected add bellow js code to your app.
-Code bellow makes some pooling to the `/keep-server-alive` endpoint and informs flaskwebgui to keep server running while gui is running. Without code bellow server will close after a few seconds.
+Code bellow makes some pooling to the `/flaskwebgui-keep-server-alive` endpoint and informs flaskwebgui to keep server running while gui is running. Without code bellow server will close after a few seconds.
 ```js
 
 async function getRequest(url='') {
@@ -25,7 +25,7 @@ async function getRequest(url='') {
 document.addEventListener('DOMContentLoaded', function() {
 
 let url = document.location
-let route = "/keep-server-alive"
+let route = "/flaskwebgui-keep-server-alive"
 let interval_request = 3 * 1000 //sec
 
 function keep_alive_server(){
@@ -84,7 +84,7 @@ python main.py
 #or
 python gui.py #in case you created gui.py 
 ```
-Application will start chrome in app mode, flask will be served by `waitress` if you have it installed. (if you have it installed).  
+Application will start chrome in app mode, flask will be served by `waitress` if you have it installed. 
 
 
 ## Usage with Flask-SocketIO
@@ -249,12 +249,16 @@ Default FlaskUI class parameters:
 
 Should work on windows/linux/mac with no isssues.
 
+**Setting width, height, fullscreen, maximized may not work in some cases.** 
+Flags provided on opening chrome are ignored for some reason. 
+I couldn't reproduce the issue in order to fix it, feel free to make a pull request for this.
+
 Develop your app as you would normally do, add flaskwebgui at the end or for tests.
 **flaskwebgui doesn't interfere with your way of doing a flask application** it just helps converting it into a desktop app more easily with pyinstaller or [pyvan](https://github.com/ClimenteA/pyvan).
 
 ### Distribution
 
-You can distribute it as a standalone desktop app with pyinstaller or [pyvan](https://github.com/ClimenteA/pyvan).
+You can distribute it as a standalone desktop app with **pyinstaller** or [**pyvan**](https://github.com/ClimenteA/pyvan).
 
 ### Credits
 It's a combination of https://github.com/Widdershin/flask-desktop and https://github.com/ChrisKnott/Eel
